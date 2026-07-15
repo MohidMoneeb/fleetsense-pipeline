@@ -7,3 +7,8 @@ response.json
 .env
 .aws/
 *.csv
+
+*.pem
+*.key
+*.crt
+certs/
