@@ -4,6 +4,7 @@ A connected-vehicle intelligence platform built on AWS.
 Telemetry flows from a simulator to Lambda ingestion to DynamoDB to analytics/AI layers.
 
 ## Architecture
+![Architecture](diagrams/architecture.svg)
 Diagram coming (see /diagrams). Current state:
 - Ingestion: fleetsense-ingest Lambda writes JSON telemetry to DynamoDB.
 - Storage: DynamoDB table VehicleTelemetry (PK vehicle_id, SK timestamp).
