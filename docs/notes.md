@@ -28,3 +28,18 @@ scoped policy (PutItem/Query on VehicleTelemetry only).
   scoped to the rule ARN.
 - Ran 3 simulators (sim-vehicle-01/02/03), one shared cert, distinct client IDs.
   Wildcard routed all three; partition key kept them separated. This is a fleet.
+
+# Day 5 - Virtual embedded node (Wokwi ESP32)
+
+- Wrote real Arduino/C++ firmware: I2C read of MPU6050 accelerometer,
+  WiFi (Wokwi-GUEST), MQTT publish to a public broker every 1s.
+- Firmware is identical to what a physical ESP32 would run - simulator-first.
+- Bridge pattern: bridge.py subscribes to the public broker and republishes
+  into AWS IoT Core with device certs. This is a legitimate industrial pattern
+  (edge broker -> cloud broker), documented as a design decision, not a hack.
+- The bridge normalizes messages (adds ISO timestamp) so DynamoDB keys are set.
+- Zero cloud changes: the fleet/+/telemetry wildcard rule + partition-key
+  schema absorbed a new device type automatically. It appeared on the dashboard.
+- Gotcha: paho-mqtt 2.x requires CallbackAPIVersion.VERSION2 as the first
+  Client() argument, or it errors immediately.
+- Harsh braking = a sharp deceleration spike on one accel axis (~0 -> +/-8).
