@@ -107,3 +107,66 @@ Gotchas: phone auto-lock and app-switching kill a recording mid-sample;
 iOS requires an explicit motion-sensor permission prompt; samples recorded
 slightly shorter (8s) than the 10000 ms requested, which is fine as long as
 it is consistent.
+
+# Day 7 - Train, quantize, deploy
+
+Training (Edge Impulse suggested architecture: dense 20 -> dense 10):
+  accuracy 89.7%, loss 0.76, ROC 0.97, weighted F1 0.90
+  Per-class F1: idle 1.00, normal 0.91, swerve 0.86, harsh_brake 0.79
+  Confusion: swerve->harsh_brake 16.7%; harsh_brake->normal 14.3%
+
+Finding: harsh_brake was the WEAKEST class, not swerve as predicted from the
+feature explorer. Cause is label noise from windowing: each 10s harsh_brake
+sample contained 2-3 jerks with calm gaps between them, and with a 2s window
+sliding every 1s, several windows contain only the calm portion. Those windows
+are physically indistinguishable from normal, so the model is not wrong - the
+labels are. Fixes: record events more densely, or crop samples to the event.
+
+QUANTIZATION TRADE-OFF (Edge Impulse profiler ESTIMATES for Espressif ESP-EYE
+ESP32 @240MHz with EON Compiler - NOT measured on physical silicon):
+                    int8        float32
+  latency (total)   30 ms       32 ms
+  RAM               2.2K        2.2K
+  flash (classifier) 15.1K      14.7K
+  accuracy          89.29%      91.07%
+
+Interpretation: quantization bought almost nothing here - 2 ms latency, zero
+RAM saving, and int8 flash was marginally LARGER - while costing 1.78
+percentage points of accuracy. Two reasons: (1) the model is tiny (two dense
+layers), and quantization savings scale with weight count, so the int8
+scale/zero-point metadata roughly cancels the weight savings; (2) spectral
+feature extraction dominates total latency at 29 ms vs 1-3 ms for the
+classifier, so the neural network was never the bottleneck. The EON Compiler
+(same accuracy, 54% less RAM, 61% less ROM) is doing far more work than
+quantization on this workload. Lesson: measure before optimizing - the
+standard "always quantize" advice does not pay off at this model scale.
+
+Deployment 1 (SUCCESS): WASM "Launch in browser" - the model runs locally on
+the phone with no network round-trip. Recorded as a demo video.
+
+Deployment 2 (BLOCKED): .eim binary + edge_impulse_linux Python runner.
+The model loads and reports its labels correctly, but classify() fails with
+"No data or corrupted data received" from the SDK's socket read. This is a
+known limitation of the Linux Python SDK on macOS / Python 3.9 - the documented
+workaround (patching the recv buffer in runner.py) did not resolve it. Real
+portability finding: the vendor's "Linux" SDK is not reliably cross-platform.
+
+DEBOUNCE DESIGN (implemented in virtual_ecu.py):
+Require N=3 consecutive windows agreeing above 0.70 confidence before emitting
+an event, and re-arm only after the signal returns to idle/normal. Trades a
+small amount of detection latency for a large reduction in false positives.
+Every production embedded system debounces; raw per-window output flickers far
+too much to act on.
+
+BANDWIDTH MATH (the business case for edge AI):
+  Raw streaming: 62.5 Hz x 3 axes = ~225,000 samples/hour/vehicle;
+    batched to 1 message/sec = 3,600 messages/hour.
+  Event-only:    ~10 messages/hour (harsh brakes and swerves are rare).
+  Reduction:     ~360x fewer messages, and far less storage and ingest cost.
+  At fleet scale this is the difference between a viable architecture and an
+  unaffordable one. It is also why the edge node should ship CONCLUSIONS
+  rather than RAW DATA.
+
+Gotcha: the IoT policy allowed publishing only to topic/fleet/*/telemetry, so
+publishing to .../events required adding topic/fleet/*/events. Same class of
+failure as the Day 5 bridge connect issue.
