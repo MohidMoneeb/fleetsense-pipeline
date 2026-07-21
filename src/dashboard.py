@@ -8,33 +8,31 @@ st.set_page_config(page_title="FleetSense", layout="wide")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("VehicleTelemetry")
 
-COOLANT_THRESHOLD = 120   # °C — matches the Lambda alert threshold
-VOLTAGE_LOW = 11.0        # V
+COOLANT_THRESHOLD = 120
+VOLTAGE_LOW = 11.0
 
 def get_vehicles():
-    # Small demo table: scan just the key to list vehicle IDs.
-    # (At scale you'd cache this or keep a registry table.)
     resp = table.scan(ProjectionExpression="vehicle_id")
     return sorted({item["vehicle_id"] for item in resp["Items"]})
 
 def get_recent(vehicle_id, n=60):
-    # Efficient: Query on the partition key, newest first, limited.
     resp = table.query(
         KeyConditionExpression=Key("vehicle_id").eq(vehicle_id),
-        ScanIndexForward=False,   # newest first
+        ScanIndexForward=False,
         Limit=n,
     )
-    items = resp["Items"][::-1]   # reverse -> chronological
+    items = resp["Items"][::-1]
     if not items:
         return pd.DataFrame()
     df = pd.DataFrame(items)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
-    for col in ["speed_kmh", "coolant_temp_c", "battery_voltage", "rpm"]:
+    for col in ["speed_kmh", "coolant_temp_c", "battery_voltage", "rpm",
+                "accel_x", "accel_y", "accel_z"]:
         if col in df:
             df[col] = df[col].astype(float)
     return df.set_index("timestamp")
 
-st.title("🚗 FleetSense — Live Fleet Dashboard")
+st.title("FleetSense - Live Fleet Dashboard")
 
 _vehicles = get_vehicles()
 selected = st.selectbox("Vehicle detail view", _vehicles) if _vehicles else None
@@ -43,7 +41,7 @@ selected = st.selectbox("Vehicle detail view", _vehicles) if _vehicles else None
 def live_view():
     vehicles = get_vehicles()
     if not vehicles:
-        st.info("No telemetry yet — start a simulator.")
+        st.info("No telemetry yet - start a simulator.")
         return
 
     st.subheader("Fleet overview")
@@ -60,7 +58,7 @@ def live_view():
         any_alert = any_alert or alert
         with col:
             st.metric(vid, f"{float(latest.get('speed_kmh', 0)):.0f} km/h")
-            st.metric("Coolant °C", f"{temp:.0f}",
+            st.metric("Coolant C", f"{temp:.0f}",
                       delta="HIGH" if temp > COOLANT_THRESHOLD else None,
                       delta_color="inverse")
             st.metric("Battery V", f"{volt:.1f}",
@@ -68,17 +66,23 @@ def live_view():
                       delta_color="inverse")
 
     if any_alert:
-        st.error("⚠️ ANOMALY DETECTED — one or more vehicles out of safe range")
+        st.error("ANOMALY DETECTED - one or more vehicles out of safe range")
 
     if selected:
-        st.subheader(f"Detail — {selected}")
+        st.subheader(f"Detail - {selected}")
         d = get_recent(selected, n=60)
         if not d.empty:
-            st.caption("Speed (km/h)")
-            st.line_chart(d[["speed_kmh"]])
-            st.caption("Coolant temp (°C)")
-            st.line_chart(d[["coolant_temp_c"]])
-            st.caption("Battery voltage (V)")
-            st.line_chart(d[["battery_voltage"]])
+            chart_fields = [
+                ("Speed (km/h)", "speed_kmh"),
+                ("Coolant temp (C)", "coolant_temp_c"),
+                ("Battery voltage (V)", "battery_voltage"),
+                ("Accel X (m/s2)", "accel_x"),
+                ("Accel Y (m/s2)", "accel_y"),
+                ("Accel Z (m/s2)", "accel_z"),
+            ]
+            for label, col in chart_fields:
+                if col in d.columns:
+                    st.caption(label)
+                    st.line_chart(d[[col]])
 
 live_view()
