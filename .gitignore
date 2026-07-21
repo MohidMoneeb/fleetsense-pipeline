@@ -12,3 +12,5 @@ response.json
 *.key
 *.crt
 certs/
+
+models/*.eim
