@@ -69,3 +69,56 @@ scoped policy (PutItem/Query on VehicleTelemetry only).
   schema-tolerant UIs.
 - Harsh braking signature: a large, brief spike on a single accel axis
   (~0 -> +/-8 m/s2), then a return to baseline.
+
+# Day 6 - TinyML concepts and data collection (Edge Impulse)
+
+Why edge inference (the four standard reasons):
+- Latency: a safety decision cannot wait for a cloud round-trip.
+- Cost: streaming raw high-rate sensor data from a whole fleet is expensive;
+  sending only detected events is tiny.
+- Privacy: raw motion data is revealing; inferring locally sends only labels.
+- Offline: tunnels and dead zones must not disable safety functions.
+
+Architectural contrast: FleetSense today ships RAW telemetry to the cloud.
+Edge inference would ship CONCLUSIONS. Same pipeline, far less bandwidth.
+
+TinyML workflow: collect -> window -> extract features -> train -> quantize
+-> deploy.
+
+Dataset: 4 classes (idle, normal, harsh_brake, swerve), 12 samples each,
+~8-10s per sample, phone accelerometer at 62.5 Hz via the Edge Impulse mobile
+client. Grip, resting position, and intensity were varied deliberately so the
+model learns the physics rather than one memorized gesture.
+
+Impulse: 2000 ms window, 1000 ms stride (50% overlap), spectral analysis
+processing block, classification learning block.
+
+FEATURE EXPLORER OBSERVATION:
+idle separates cleanly into a tight, isolated cluster - unsurprising, since
+the absence of motion has a signature no other class can imitate. normal and
+harsh_brake each form reasonably coherent regions. The problem class is
+swerve, which is smeared across the space and overlaps BOTH normal and
+harsh_brake rather than occupying its own region. The physical reason is that
+an accelerometer measures linear acceleration plus gravity - it does not
+directly measure rotation, and a swerve is fundamentally a rotational event.
+So a swerve registers only indirectly, and in two different ways depending on
+execution: a laterally-translated swerve produces a sharp linear transient
+that is nearly indistinguishable from harsh_brake apart from which axis
+carries the energy, while a mostly-rotational swerve appears as a slow
+redistribution of the gravity vector across axes, which resembles the gentle
+swaying of normal. Hence red points appear in both neighbourhoods. The most
+confusable pair is therefore swerve and harsh_brake: both are high-magnitude
+transients whose only real discriminator is axis of action, and any variation
+in grip or phone orientation smears that axis information across samples.
+This is the central tension of the dataset - varying orientation improves
+generalization but erodes the very cue that separates these two classes.
+The correct engineering fix is sensor fusion: adding a gyroscope would
+measure rotation directly and separate swerve cleanly.
+
+A handful of stray idle windows sit near the centre of the plot - these are
+almost certainly captured while repositioning the phone between samples.
+
+Gotchas: phone auto-lock and app-switching kill a recording mid-sample;
+iOS requires an explicit motion-sensor permission prompt; samples recorded
+slightly shorter (8s) than the 10000 ms requested, which is fine as long as
+it is consistent.
