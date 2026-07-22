@@ -115,3 +115,7 @@ and a device certificate/key from AWS IoT Core.
 Day 8 of 20 — Module 1 shipped (ingest, store, alert, visualize) and a
 zero-hardware edge-AI driving-behavior detector trained, profiled, and deployed
 to the browser via WebAssembly.
+
+## Featured writing
+
+- [Building a Zero-Hardware Edge-AI Driving-Behavior Detector with Edge Impulse, Wokwi, and AWS IoT Core](https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-a-zero-hardware-edge-ai-driving-behavior-detector-with-edge-impulse-wokwi-and-aws-iot-core) — AWS Builder Center

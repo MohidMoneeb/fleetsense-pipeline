@@ -183,3 +183,5 @@ failure as the Day 5 bridge connect issue.
 - The novel angle that carried the piece: zero hardware. Phone as sensor,
   Wokwi as the embedded target, AWS free tier as the cloud - fully reproducible.
 - No AWS/IoT policy changes needed today.
+
+Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-a-zero-hardware-edge-ai-driving-behavior-detector-with-edge-impulse-wokwi-and-aws-iot-core
