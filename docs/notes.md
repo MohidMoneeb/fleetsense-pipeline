@@ -170,3 +170,16 @@ BANDWIDTH MATH (the business case for edge AI):
 Gotcha: the IoT policy allowed publishing only to topic/fleet/*/telemetry, so
 publishing to .../events required adding topic/fleet/*/events. Same class of
 failure as the Day 5 bridge connect issue.
+
+# Day 8 - Technical writing + repo polish
+
+- Shipped Builder Center article #1: "Building a Zero-Hardware Edge-AI
+  Driving-Behavior Detector with Edge Impulse, Wokwi, and AWS IoT Core".
+- Repo polish: Wokwi diagram screenshot, demo GIF (WASM browser inference),
+  README rewrite (fixed stale Day 4 status, added ESP32/bridge/vECU/events,
+  profiler table, 360x bandwidth math).
+- Editing exercise: cut the draft ~20% (1233 -> ~985 words). Adverbs, hedges,
+  and throat-clearing lead-ins were the easy 250 to lose.
+- The novel angle that carried the piece: zero hardware. Phone as sensor,
+  Wokwi as the embedded target, AWS free tier as the cloud - fully reproducible.
+- No AWS/IoT policy changes needed today.
