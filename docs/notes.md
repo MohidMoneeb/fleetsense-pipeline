@@ -208,3 +208,21 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
   Data gitignored; notebooks/fetch_data.sh reproduces it.
 - Gotcha pre-empted: computed the flat-sensor list rather than trusting a
   hardcoded one - s_6 is near-constant but not zero-variance, easy to miscount.
+
+# Day 10 - Feature engineering + honest baseline (FD001)
+
+- Features: dropped 6 flat sensors, added rolling mean/std/slope over 5/10/20
+  cycle windows, computed per-engine so no info crosses engine boundaries.
+- Split by UNIT (80 train / 20 test), never by row. Baselines on clipped RUL:
+  LinearRegression 17.66 RMSE, RandomForest 18.91 RMSE.
+- Model fails most at high RUL (early, healthy life). Acceptable for a
+  maintenance product: decisions only matter near the service threshold, where
+  the model is accurate. The clip at 125 encodes exactly this.
+- LEAKAGE EXPERIMENT: same features/model split by row instead of engine gave
+  RMSE 10.55 - looks 1.8x better and is a lie. Why it lied (two sentences):
+  Because rolling features summarize an engine's own recent history, a row split
+  puts different cycles of the same engine on both sides, so the model is quietly
+  tested on engines it trained on and its features encode those engines'
+  trajectories. That RMSE measures memorization of known engines, not prediction
+  on unseen ones, so it collapses the moment a genuinely new engine arrives.
+- Artifact: notebooks/02_feature_baseline_FD001.ipynb (executed, plots embedded).
