@@ -226,3 +226,17 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
   trajectories. That RMSE measures memorization of known engines, not prediction
   on unseen ones, so it collapses the moment a genuinely new engine arrives.
 - Artifact: notebooks/02_feature_baseline_FD001.ipynb (executed, plots embedded).
+
+# Day 11 - Better models + experiment discipline (FD001)
+
+- Ran 8 experiments on one fixed engine-level split (comparable RMSE, failures kept).
+  Winner: tuned XGBoost, val RMSE 17.02 (vs RandomForest 18.91, LinReg 17.66,
+  LightGBM tuned 17.20). Feature-trimming hurt -> std/slope carry real signal.
+- Froze winner (retrained on all 100 engines) with joblib: notebooks/rul_xgb_model.joblib.
+  Official test_FD001: RMSE 16.55, NASA asymmetric score 632.
+- Feature importance -> physics: top sensors are s_4 (T50, LPT outlet temp, ~40%),
+  s_15 (BPR, bypass ratio), s_11 (Ps30, HPC outlet static pressure). FD001's fault
+  mode is HPC degradation, so a model leaning on gas-path temperature and HPC outlet
+  pressure is physically correct - it recovered the failure signature, not noise.
+- Artifacts: experiments.md (honest table), model_card.md (intended use, metrics,
+  failure modes, what NOT to trust), notebooks/03_models_experiments_FD001.ipynb.
