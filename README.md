@@ -132,3 +132,7 @@ telemetry from healthy through to a fault. The prediction target, **Remaining Us
 service*. FleetSense already stores per-vehicle time-series keyed by `vehicle_id` and `timestamp`
 — structurally identical to C-MAPSS keyed by `unit` and `cycle` — so the RUL framing transfers
 straight onto the existing pipeline. See [`notebooks/01_cmapss_eda_FD001.ipynb`](notebooks/01_cmapss_eda_FD001.ipynb).
+
+## Predictive maintenance model
+
+- [Model card](model_card.md) · [experiment log](experiments.md) — frozen XGBoost RUL regressor (C-MAPSS FD001), test RMSE 16.55.
