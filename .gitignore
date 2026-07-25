@@ -14,3 +14,7 @@ response.json
 certs/
 
 models/*.eim
+
+notebooks/data/
+.DS_Store
+models/

@@ -119,3 +119,16 @@ to the browser via WebAssembly.
 ## Featured writing
 
 - [Building a Zero-Hardware Edge-AI Driving-Behavior Detector with Edge Impulse, Wokwi, and AWS IoT Core](https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-a-zero-hardware-edge-ai-driving-behavior-detector-with-edge-impulse-wokwi-and-aws-iot-core) — AWS Builder Center
+
+## Predictive maintenance (Day 9) — from turbofans to vehicles
+
+FleetSense's next module tackles predictive maintenance, benchmarked on NASA's **C-MAPSS**
+turbofan run-to-failure dataset (FD001). The dataset is a fleet of 100 engines, each logged across
+operating cycles by 21 sensors until it fails — and it maps directly onto vehicle telemetry:
+an **engine** is a **vehicle**, a **cycle** is a **trip**, the **21 engine sensors** are **OBD-II/CAN
+channels** (coolant temp, RPM, battery voltage, …), and a run-to-failure trajectory is a vehicle's
+telemetry from healthy through to a fault. The prediction target, **Remaining Useful Life**
+(`max_cycle − current_cycle`, clipped at 125), becomes *trips or miles until a component needs
+service*. FleetSense already stores per-vehicle time-series keyed by `vehicle_id` and `timestamp`
+— structurally identical to C-MAPSS keyed by `unit` and `cycle` — so the RUL framing transfers
+straight onto the existing pipeline. See [`notebooks/01_cmapss_eda_FD001.ipynb`](notebooks/01_cmapss_eda_FD001.ipynb).
