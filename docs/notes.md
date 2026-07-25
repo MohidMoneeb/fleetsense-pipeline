@@ -185,3 +185,26 @@ failure as the Day 5 bridge connect issue.
 - No AWS/IoT policy changes needed today.
 
 Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-a-zero-hardware-edge-ai-driving-behavior-detector-with-edge-impulse-wokwi-and-aws-iot-core
+
+# Day 9 - Predictive maintenance EDA: NASA C-MAPSS (FD001)
+
+- Loaded FD001: 100 engines run to failure, 21 sensors + 3 settings per cycle,
+  20,631 rows, no missing values. Lifetimes range ~128-362 cycles.
+- Sensor triage by variance: s_1, s_5, s_10, s_16, s_18, s_19 are flat
+  (zero variance under FD001's single operating condition) and get dropped;
+  s_6 is near-constant. The rest (s_2, s_3, s_4, s_7, s_11, s_12, s_15, s_17,
+  s_20, s_21, ...) carry a clear degradation trend - noisy but directional.
+- RUL label = max_cycle(engine) - current_cycle. Clipped at 125: early life is
+  "healthy" and sensors look identical whether RUL is 250 or 200, so an unclipped
+  target forces the model to fit noise. Clip encodes piecewise-linear degradation.
+  Standard C-MAPSS convention.
+- Three problem framings: RUL regression (used here), anomaly detection,
+  health-zone classification.
+- Product-thinking translation for FleetSense: engine -> vehicle, cycle -> trip,
+  21 sensors -> OBD-II/CAN channels, run-to-failure -> telemetry to fault,
+  RUL -> trips/miles to service. C-MAPSS (unit, cycle) maps onto FleetSense's
+  (vehicle_id, timestamp) directly.
+- Artifact: notebooks/01_cmapss_eda_FD001.ipynb (executed, plots embedded).
+  Data gitignored; notebooks/fetch_data.sh reproduces it.
+- Gotcha pre-empted: computed the flat-sensor list rather than trusting a
+  hardcoded one - s_6 is near-constant but not zero-variance, easy to miscount.
