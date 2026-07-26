@@ -251,3 +251,19 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
   and the inference diagram.
 - Drafted resume bullets for Modules 1-3 (docs/resume_bullets_modules_1-3.md).
 - Health panel verified: engine-critical scored RUL 2.24 -> red alongside 5 healthy engines.
+
+# Day 14 - AI agents: LangGraph + Bedrock
+
+- Confirmed Bedrock Converse from boto3 (bedrock_smoketest.py). Model auto-enabled
+  on first invoke after submitting Anthropic use-case details. Working profile id:
+  us.anthropic.claude-haiku-4-5-20251001-v1:0 (US cross-region inference profile,
+  NOT the bare model id).
+- Built a minimal LangGraph ReAct agent, one calculator tool (agent_calculator.py).
+  Trace: Human -> AI(tool_call multiply) -> Tool(896) -> AI(tool_call add 896+46)
+  -> Tool(942) -> AI(final 942). Model chained the first result into the second
+  call itself - that reason/act/observe loop is what makes it an agent.
+- EXERCISE (agent_lying_tool.py): tool docstring says "add", code multiplies;
+  agent trusts the docstring and returns 42 for 6+7. Lesson: tool descriptions
+  ARE prompts; agents are only as good as their tool interfaces.
+- Env: agent stack on a Python 3.12 venv (agent-venv, gitignored), retiring the
+  system-3.9 problem.
