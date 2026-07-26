@@ -1,0 +1,35 @@
+{
+  "note": "Expected answers are pre-filled from the known data state. VERIFY each against your own check_tools.py output and edit must_include before grading — defining expected answers from verified ground truth IS the eval discipline.",
+  "cases": [
+    {
+      "id": "least_healthy",
+      "question": "Which vehicle looks least healthy right now, and why?",
+      "must_include": ["red"],
+      "expected_note": "The vehicle with the lowest RUL / red band (e.g. engine-critical ~2.24, or engine-003 if critical is gone). Adjust to your data."
+    },
+    {
+      "id": "engine003_events",
+      "question": "Does engine-003 have any recent driving-behavior events? List them.",
+      "must_include": ["harsh_brake", "swerve"],
+      "expected_note": "After seed_events.py: engine-003 has a harsh_brake and a swerve."
+    },
+    {
+      "id": "engine002_band",
+      "question": "What is the current health band for engine-002?",
+      "must_include": ["green"],
+      "expected_note": "engine-002 scores high RUL -> green. Verify with predict_health."
+    },
+    {
+      "id": "compare_002_003",
+      "question": "Is engine-002 healthier than engine-003? Answer yes or no and give the RUL numbers.",
+      "must_include": ["yes"],
+      "expected_note": "engine-002 RUL (~123) > engine-003 RUL (~50), so yes."
+    },
+    {
+      "id": "car_no_rul",
+      "question": "What is the remaining useful life of CAR-001?",
+      "must_include": ["engine"],
+      "expected_note": "predict_health refuses non-engine vehicles; the agent should explain RUL only applies to engine vehicles."
+    }
+  ]
+}

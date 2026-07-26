@@ -267,3 +267,18 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
   ARE prompts; agents are only as good as their tool interfaces.
 - Env: agent stack on a Python 3.12 venv (agent-venv, gitignored), retiring the
   system-3.9 problem.
+
+# Day 15 - Real tools: the agent meets the fleet
+
+- Built 4 read-only, typed, single-purpose tools wrapping existing infra
+  (agents/tools.py): get_fleet_status, get_vehicle_history, get_recent_events,
+  predict_health (calls the Module 3 /predict API).
+- Verified every tool against real data with check_tools.py at ZERO model cost;
+  output matched the dashboard exactly (engine-critical 2.24 red, engine-003
+  50.57 yellow, rest green; heterogeneous schemas handled).
+- Wired all 4 into one diagnostics agent (agents/diagnostics_agent.py).
+- First eval set: 5 questions with known answers (agents/evals/eval_set.json),
+  graded by run_evals.py (keyword match). least_healthy expected = engine-critical.
+  Full grading run deferred (Bedrock credit ceiling); verifying tools first is the
+  cheap, correct order.
+- Design note: tools read-only, single-purpose, docstrings written FOR the model.
