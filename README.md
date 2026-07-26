@@ -168,7 +168,3 @@ cat >> docs/notes.md << 'EOF'
 ### Inference architecture
 
 ![Inference flow](diagrams/inference_architecture.svg)
-
-### Inference architecture
-
-![Inference flow](diagrams/inference_architecture.svg)
