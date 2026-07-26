@@ -240,3 +240,14 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
   pressure is physically correct - it recovered the failure signature, not noise.
 - Artifacts: experiments.md (honest table), model_card.md (intended use, metrics,
   failure modes, what NOT to trust), notebooks/03_models_experiments_FD001.ipynb.
+
+# Day 13 - Module 3 ship-day
+
+- Added inference-flow architecture diagram (diagrams/inference_architecture.svg):
+  real-time API path, scheduled scoring, monitoring.
+- Notebooks are restart-run-all clean (produced by fresh top-to-bottom execution).
+  Local nbconvert re-verify skipped: newest jupyter stack needs Python 3.10+.
+- README carries metrics (test RMSE 16.55), Lambda-vs-SageMaker cost analysis,
+  and the inference diagram.
+- Drafted resume bullets for Modules 1-3 (docs/resume_bullets_modules_1-3.md).
+- Health panel verified: engine-critical scored RUL 2.24 -> red alongside 5 healthy engines.

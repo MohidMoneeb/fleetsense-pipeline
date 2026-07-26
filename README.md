@@ -164,3 +164,11 @@ cat >> docs/notes.md << 'EOF'
 - Load test (50 req): cold ~1199 ms, warm ~1020-1100 ms. Cost note: Lambda scales
   to zero (near-$0 idle) and suits spiky low-volume polling; SageMaker endpoint is
   always-on and only wins at sustained high volume / strict latency SLAs.
+
+### Inference architecture
+
+![Inference flow](diagrams/inference_architecture.svg)
+
+### Inference architecture
+
+![Inference flow](diagrams/inference_architecture.svg)
