@@ -86,3 +86,21 @@ def live_view():
                     st.line_chart(d[[col]])
 
 live_view()
+
+# --- Fleet health panel (Module 2) ---
+import boto3
+st.subheader("Fleet Health (RUL)")
+_health = boto3.resource("dynamodb", region_name="us-east-1").Table("VehicleHealth")
+_rows = _health.scan().get("Items", [])
+_latest = {}
+for r in _rows:
+    v = r["vehicle_id"]
+    if v not in _latest or r["timestamp"] > _latest[v]["timestamp"]:
+        _latest[v] = r
+if _latest:
+    cols = st.columns(len(_latest))
+    _emoji = {"green": "🟢", "yellow": "🟡", "red": "🔴"}
+    for col, (vid, r) in zip(cols, sorted(_latest.items())):
+        col.metric(f"{_emoji.get(r['band'],'⚪')} {vid}", f"RUL {r['rul']}", r["band"])
+else:
+    st.info("No health scores yet — the poller runs every 5 minutes.")

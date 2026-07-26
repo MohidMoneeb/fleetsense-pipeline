@@ -136,3 +136,31 @@ straight onto the existing pipeline. See [`notebooks/01_cmapss_eda_FD001.ipynb`]
 ## Predictive maintenance model
 
 - [Model card](model_card.md) · [experiment log](experiments.md) — frozen XGBoost RUL regressor (C-MAPSS FD001), test RMSE 16.55.
+
+## Serving & monitoring (Module 2)
+
+The frozen RUL model is deployed as a **container-image Lambda** behind **API Gateway** (`POST /predict`: sensor window → RUL + health band). A scheduled **EventBridge** poller (every 5 min) pulls recent telemetry from DynamoDB, calls the model, and writes health scores to a `VehicleHealth` table. **CloudWatch alarms** watch Lambda errors and p95 latency (→ SNS).
+
+**Measured latency** (50-request load test): cold start ~1.2 s, warm ~1.0–1.1 s.
+
+**Lambda vs. SageMaker real-time endpoint.** Lambda wins for FleetSense's spiky, low-volume scoring: it scales to zero, so idle cost is ~$0, and per-request pricing suits infrequent polling. The tradeoffs are cold starts (~1.2 s here) and per-invoke library load (xgboost is imported each cold start). An always-on SageMaker endpoint removes cold starts and gives lower, steadier latency, but bills ~24/7 per instance-hour regardless of traffic — only
+
+cd ~/fleetsense/fleetsense-pipeline
+printf '\nserving/data/\nserving/*.zip\nserving/__pycache__/\n' >> .gitignore
+cat >> docs/notes.md << 'EOF'
+
+# Day 12 - Deploy: serverless inference API + monitoring
+
+- Frozen XGBoost RUL model -> container-image Lambda (fleetsense-rul-predict)
+  behind API Gateway POST /predict (sensor window -> RUL + green/yellow/red band).
+- Model converted to native XGBoost JSON (portable, no joblib/sklearn in image);
+  image slimmed by stripping nvidia CUDA libs xgboost pulls in by default.
+- Gotcha (Apple Silicon): must build --platform linux/amd64 AND
+  --provenance=false --sbom=false, else Lambda rejects the OCI manifest.
+- Scheduled poller (EventBridge every 5 min) reads VehicleTelemetry, invokes the
+  model, writes to VehicleHealth. CloudWatch alarms on errors + p95 latency -> SNS.
+- Data mismatch handled honestly: turbofan model can't run on real vehicle
+  telemetry, so C-MAPSS engines are seeded as stand-in vehicles.
+- Load test (50 req): cold ~1199 ms, warm ~1020-1100 ms. Cost note: Lambda scales
+  to zero (near-$0 idle) and suits spiky low-volume polling; SageMaker endpoint is
+  always-on and only wins at sustained high volume / strict latency SLAs.
