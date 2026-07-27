@@ -282,3 +282,25 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
   Full grading run deferred (Bedrock credit ceiling); verifying tools first is the
   cheap, correct order.
 - Design note: tools read-only, single-purpose, docstrings written FOR the model.
+
+# Day 16 - Multi-agent supervisor + long-term memory
+
+- FleetPilot: supervisor routes Diagnostics (read-only telemetry) -> Fleet Ops
+  (prioritize by severity+cost heuristic; reads/writes FleetNotes) -> Report Writer
+  (Markdown, no tools). agents/fleetpilot.py. Graph nodes: supervisor,
+  diagnostics_agent, ops_agent, report_writer.
+- Short-term memory: InMemorySaver checkpointer keyed by thread_id (conversation
+  state). Long-term memory: DynamoDB FleetNotes table (agents/fleet_notes.py) -
+  persists incidents across runs. Seeded a past sim-vehicle-02 voltage sag so the
+  ops agent detects recurrence ("same sag last week") on the first run.
+- Why multi-agent beats one mega-prompt here (defensible, not hype):
+  * Separation of concerns: each agent has ONE job and a focused prompt, so the
+    diagnosis stays distinct from prioritization stays distinct from formatting.
+  * Different tools/permissions per role: Diagnostics is read-only; only Ops can
+    write FleetNotes; Report Writer has no tools at all (can't touch data).
+  * Consistent report format: the writer sees only clean findings, so formatting
+    doesn't drift the way a single agent's does when juggling all jobs at once.
+  * Single mega-agent failure modes observed: buries the diagnosis, mixes
+    priorities into the report, inconsistent formatting run to run.
+- Cost note: multi-agent uses more tokens (more model calls) - justified when
+  separation of concerns and per-role permissions matter, not for trivial tasks.
