@@ -2,19 +2,23 @@ import streamlit as st
 import boto3
 from boto3.dynamodb.conditions import Key
 import pandas as pd
-
 st.set_page_config(page_title="FleetSense", layout="wide")
+
+import sys, os
+sys.path.append(os.path.expanduser("~/fleetsense/fleetsense-pipeline/agents"))
+_view = st.sidebar.radio("View", ["Dashboard", "Ask FleetPilot"])
+if _view == "Ask FleetPilot":
+    from chat_ui import render_chat
+    render_chat()
+    st.stop()
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("VehicleTelemetry")
-
 COOLANT_THRESHOLD = 120
 VOLTAGE_LOW = 11.0
-
 def get_vehicles():
     resp = table.scan(ProjectionExpression="vehicle_id")
     return sorted({item["vehicle_id"] for item in resp["Items"]})
-
 def get_recent(vehicle_id, n=60):
     resp = table.query(
         KeyConditionExpression=Key("vehicle_id").eq(vehicle_id),
@@ -25,25 +29,21 @@ def get_recent(vehicle_id, n=60):
     if not items:
         return pd.DataFrame()
     df = pd.DataFrame(items)
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     for col in ["speed_kmh", "coolant_temp_c", "battery_voltage", "rpm",
                 "accel_x", "accel_y", "accel_z"]:
         if col in df:
             df[col] = df[col].astype(float)
     return df.set_index("timestamp")
-
 st.title("FleetSense - Live Fleet Dashboard")
-
 _vehicles = get_vehicles()
 selected = st.selectbox("Vehicle detail view", _vehicles) if _vehicles else None
-
 @st.fragment(run_every="3s")
 def live_view():
     vehicles = get_vehicles()
     if not vehicles:
         st.info("No telemetry yet - start a simulator.")
         return
-
     st.subheader("Fleet overview")
     cols = st.columns(len(vehicles))
     any_alert = False
@@ -64,10 +64,8 @@ def live_view():
             st.metric("Battery V", f"{volt:.1f}",
                       delta="LOW" if volt < VOLTAGE_LOW else None,
                       delta_color="inverse")
-
     if any_alert:
         st.error("ANOMALY DETECTED - one or more vehicles out of safe range")
-
     if selected:
         st.subheader(f"Detail - {selected}")
         d = get_recent(selected, n=60)
@@ -84,9 +82,7 @@ def live_view():
                 if col in d.columns:
                     st.caption(label)
                     st.line_chart(d[[col]])
-
 live_view()
-
 # --- Fleet health panel (Module 2) ---
 import boto3
 st.subheader("Fleet Health (RUL)")

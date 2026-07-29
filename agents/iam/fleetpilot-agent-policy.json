@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadTelemetryTables",
+      "Effect": "Allow",
+      "Action": ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:Scan"],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:532918215916:table/VehicleTelemetry",
+        "arn:aws:dynamodb:us-east-1:532918215916:table/VehicleHealth",
+        "arn:aws:dynamodb:us-east-1:532918215916:table/VehicleEvents"
+      ]
+    },
+    {
+      "Sid": "ReadWriteFleetNotesOnly",
+      "Effect": "Allow",
+      "Action": ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem"],
+      "Resource": "arn:aws:dynamodb:us-east-1:532918215916:table/FleetNotes"
+    },
+    {
+      "Sid": "DenyAllWritesToTelemetry",
+      "Effect": "Deny",
+      "Action": ["dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:532918215916:table/VehicleTelemetry",
+        "arn:aws:dynamodb:us-east-1:532918215916:table/VehicleHealth",
+        "arn:aws:dynamodb:us-east-1:532918215916:table/VehicleEvents"
+      ]
+    },
+    {
+      "Sid": "InvokeModelAndPredict",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "lambda:InvokeFunction"],
+      "Resource": "*"
+    }
+  ]
+}
