@@ -321,3 +321,15 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
 - Injection exercise: 3 attacks (direct, indirect via poisoned FleetNotes, jailbreak) -
   all resisted; indirect injection was explicitly flagged as suspicious. Documented in
   docs/security-notes.md.
+
+# Day 18 - Ship Module 4 + Builder Center article #2
+
+- Exported the FleetPilot supervisor graph (diagrams/fleetpilot_graph.png/.mmd via
+  LangGraph's own renderer). Eval results table: docs/eval_results.md (13/15, honest).
+- README: added Module 4 section, graph + chat screenshot, links to eval + security notes.
+- Builder Center article #2 finalized: "A Multi-Agent Fleet Copilot on Amazon Bedrock
+  with LangGraph" (docs/articles/article-2.md) - architecture, supervisor pattern,
+  memory design, eval methodology, honest limitations. ~870 words after 20% cut.
+- Used a chat screenshot (webp) instead of a GIF.
+- TODO: add published article-2 link to README; LinkedIn post + 2-3 Builder Center
+  comments batched.

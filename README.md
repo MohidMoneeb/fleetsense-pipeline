@@ -177,3 +177,23 @@ writes — the agent cannot corrupt fleet data even if fully compromised. Additi
 tools in the chat agent, a per-call output cap, an iteration limit, a per-session token budget, and
 a scope/injection-resistance system prompt. Prompt-injection findings are documented in
 [docs/security-notes.md](docs/security-notes.md).
+
+## FleetPilot — multi-agent copilot (Module 4)
+
+A three-role LangGraph supervisor on Amazon Bedrock (Claude Haiku 4.5): Diagnostics (read-only telemetry) → Fleet Ops (prioritize + long-term memory) → Report Writer. Short-term memory via a checkpointer; long-term incident memory in a DynamoDB `FleetNotes` table (recurrence detection). Guardrails: least-privilege read-only IAM, iteration/token caps, injection-resistance. Evaluated at 13/15 on a 15-case set; all three prompt-injection attacks resisted.
+
+![FleetPilot graph](diagrams/fleetpilot_graph.png)
+
+![Ask FleetPilot](diagrams/fleetpilot_chat_demo.png)
+
+- [Evaluation results](docs/eval_results.md) · [Security notes](docs/security-notes.md)
+
+## FleetPilot — multi-agent copilot (Module 4)
+
+A three-role LangGraph supervisor on Amazon Bedrock (Claude Haiku 4.5): Diagnostics (read-only telemetry) → Fleet Ops (prioritize + long-term memory) → Report Writer. Short-term memory via a checkpointer; long-term incident memory in a DynamoDB `FleetNotes` table (recurrence detection). Guardrails: least-privilege read-only IAM, iteration/token caps, injection-resistance. Evaluated at 13/15 on a 15-case set; all three prompt-injection attacks resisted.
+
+![FleetPilot graph](diagrams/fleetpilot_graph.png)
+
+![Ask FleetPilot](diagrams/fleetpilot_chat_demo.webp)
+
+- [Evaluation results](docs/eval_results.md) · [Security notes](docs/security-notes.md)

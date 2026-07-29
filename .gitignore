@@ -21,3 +21,15 @@ models/
 
 agent-venv/
 agents/__pycache__/
+
+.claude/
+.agents/
+serving/data/
+agent-venv/
+__pycache__/
+
+.claude/
+.agents/
+serving/data/
+agent-venv/
+__pycache__/
