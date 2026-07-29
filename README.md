@@ -168,3 +168,12 @@ cat >> docs/notes.md << 'EOF'
 ### Inference architecture
 
 ![Inference flow](diagrams/inference_architecture.svg)
+
+## Agent guardrails (Module 4)
+
+FleetPilot runs under a least-privilege IAM identity (`fleetpilot-agent`) that is **read-only on
+all telemetry tables** and can write only to `FleetNotes`, with an explicit Deny on telemetry
+writes — the agent cannot corrupt fleet data even if fully compromised. Additional rails: read-only
+tools in the chat agent, a per-call output cap, an iteration limit, a per-session token budget, and
+a scope/injection-resistance system prompt. Prompt-injection findings are documented in
+[docs/security-notes.md](docs/security-notes.md).

@@ -304,3 +304,20 @@ Published: https://builder.aws.com/content/3GqGnUj7Qexb9HPpRK10fNs5Eei/building-
     priorities into the report, inconsistent formatting run to run.
 - Cost note: multi-agent uses more tokens (more model calls) - justified when
   separation of concerns and per-role permissions matter, not for trivial tasks.
+
+# Day 17 - Guardrails, evaluation, chat UI
+
+- Hardened FleetPilot: read-only chat tools, recursion_limit=12, max_tokens=1024,
+  per-session token budget (60k), scope + injection-resistance prompt (chat_agent.py).
+- Least-privilege IAM: fleetpilot-agent user, read-only on telemetry tables, write
+  only FleetNotes, explicit Deny on telemetry writes. Verified: telemetry PutItem
+  -> AccessDenied; FleetNotes PutItem -> OK. (agents/iam/fleetpilot-agent-policy.json)
+- Streamlit "Ask FleetPilot" chat view added to the dashboard (venv), conversation
+  memory per session, live token-budget bar (chat_ui.py).
+- Expanded eval set to 15 cases incl. out-of-scope + injection (evals/eval_set.json).
+  Pass rate: 13/15 (both misses were grading artifacts: harsh_brake vs "harsh brake"
+  formatting; and "past incidents" read events not FleetNotes). Injection + out-of-scope
+  cases all passed.
+- Injection exercise: 3 attacks (direct, indirect via poisoned FleetNotes, jailbreak) -
+  all resisted; indirect injection was explicitly flagged as suspicious. Documented in
+  docs/security-notes.md.
