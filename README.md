@@ -187,3 +187,5 @@ A three-role LangGraph supervisor on Amazon Bedrock (Claude Haiku 4.5): Diagnost
 ![Ask FleetPilot](diagrams/fleetpilot_chat_demo.webp)
 
 - [Evaluation results](docs/eval_results.md) · [Security notes](docs/security-notes.md)
+
+- [A Multi-Agent Fleet Copilot on Amazon Bedrock with LangGraph](https://builder.aws.com/content/3HBKnOnwPCUNoymNrGfkU1Brsx4/a-multi-agent-fleet-copilot-on-amazon-bedrock-with-langgraph) — AWS Builder Center
