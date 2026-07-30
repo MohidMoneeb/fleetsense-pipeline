@@ -12,7 +12,8 @@ REGION      = os.environ.get("AWS_REGION", "us-east-1")
 PREDICT_URL = os.environ.get("PREDICT_URL", "https://8148a8gs1e.execute-api.us-east-1.amazonaws.com/predict")
 SENSORS     = [f"s_{i}" for i in range(1, 22)]
 
-_ddb   = boto3.resource("dynamodb", region_name=REGION)
+from aws_helper import boto3_kwargs
+_ddb   = boto3.resource("dynamodb", **boto3_kwargs())
 TELEM  = _ddb.Table("VehicleTelemetry")
 HEALTH = _ddb.Table("VehicleHealth")
 EVENTS = _ddb.Table("VehicleEvents")

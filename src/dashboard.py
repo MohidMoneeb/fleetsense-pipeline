@@ -6,13 +6,15 @@ st.set_page_config(page_title="FleetSense", layout="wide")
 
 import sys, os
 sys.path.append(os.path.expanduser("~/fleetsense/fleetsense-pipeline/agents"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "agents"))
+from aws_helper import boto3_kwargs
 _view = st.sidebar.radio("View", ["Dashboard", "Ask FleetPilot"])
 if _view == "Ask FleetPilot":
     from chat_ui import render_chat
     render_chat()
     st.stop()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", **boto3_kwargs())
 table = dynamodb.Table("VehicleTelemetry")
 COOLANT_THRESHOLD = 120
 VOLTAGE_LOW = 11.0
@@ -86,7 +88,7 @@ live_view()
 # --- Fleet health panel (Module 2) ---
 import boto3
 st.subheader("Fleet Health (RUL)")
-_health = boto3.resource("dynamodb", region_name="us-east-1").Table("VehicleHealth")
+_health = boto3.resource("dynamodb", **boto3_kwargs()).Table("VehicleHealth")
 _rows = _health.scan().get("Items", [])
 _latest = {}
 for r in _rows:

@@ -11,7 +11,8 @@ from boto3.dynamodb.conditions import Key
 from langchain_core.tools import tool
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
-_ddb   = boto3.resource("dynamodb", region_name=REGION)
+from aws_helper import boto3_kwargs
+_ddb   = boto3.resource("dynamodb", **boto3_kwargs())
 NOTES  = _ddb.Table("FleetNotes")
 
 @tool

@@ -15,7 +15,8 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.errors import GraphRecursionError
 
 from tools import get_fleet_status, get_vehicle_history, get_recent_events, predict_health
-from fleet_notes import read_fleet_notes   # READ-only; write tool deliberately NOT exposed
+from fleet_notes import read_fleet_notes
+from aws_helper import boto3_kwargs   # READ-only; write tool deliberately NOT exposed
 
 MODEL_ID        = os.environ.get("MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
 REGION          = os.environ.get("AWS_REGION", "us-east-1")
@@ -37,7 +38,7 @@ SCOPE_PROMPT = (
  "Base every factual claim on tool output and cite vehicle_ids and numbers.")
 
 def build_chat_agent():
-    model = ChatBedrockConverse(model=MODEL_ID, region_name=REGION, temperature=0, max_tokens=MAX_TOKENS)
+    model = ChatBedrockConverse(model=MODEL_ID, temperature=0, max_tokens=MAX_TOKENS, **boto3_kwargs())
     tools = [get_fleet_status, get_vehicle_history, get_recent_events, predict_health, read_fleet_notes]
     return create_react_agent(model, tools=tools, prompt=SCOPE_PROMPT, checkpointer=InMemorySaver())
 
