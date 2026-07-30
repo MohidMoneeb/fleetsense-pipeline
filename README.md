@@ -184,6 +184,6 @@ A three-role LangGraph supervisor on Amazon Bedrock (Claude Haiku 4.5): Diagnost
 
 ![FleetPilot graph](diagrams/fleetpilot_graph.png)
 
-![Ask FleetPilot](diagrams/fleetpilot_chat_demo.png)
+![Ask FleetPilot](diagrams/fleetpilot_chat_demo.webp)
 
 - [Evaluation results](docs/eval_results.md) · [Security notes](docs/security-notes.md)
